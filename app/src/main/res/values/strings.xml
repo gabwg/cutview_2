@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CUTView 2</string>
+    <string name="book_prompt">請選擇書卷</string>
+    <string name="chapter_prompt">請選擇章</string>
+</resources>
