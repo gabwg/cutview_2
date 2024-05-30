@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CUTView 2"
+rootProject.name = "Simple Bible App"
 include(":app")
  
