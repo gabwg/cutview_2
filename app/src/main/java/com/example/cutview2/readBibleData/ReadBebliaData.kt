@@ -3,6 +3,7 @@ package com.example.cutview2.readBibleData
 import android.content.Context
 import com.example.cutview2.R
 import com.example.cutview2.dataClasses.BookDetails
+import org.xmlpull.v1.XmlPullParser
 
 
 val en_translations = arrayOf("esv", "kj", "niv")
@@ -34,11 +35,47 @@ class ReadBebliaData(context: Context, translation: String) : ReadBibleData {
     }
 
     override fun getChapterFromBook(bookDetails: BookDetails, chapter: Int): List<String> {
+        /* use xml pull parser on the xml specified.
+        start/end tags:
+        - "testament" tag - effectively ignored as we are going by book, as testaments and book index in xml file are independent
+        - "book" tag - get the book tag with "number"/index 0 field matching the desired book
+        - "chapter" tag  - get the chapter with "number"/index 0 field matching the desired chapter
+        - "verse" tag - get all verses under the chapter and put all the verses into a list to return
+        */
+        var parser : XmlPullParser = resources.getXml(xmlId)
+        var eventType = parser.eventType
+
+        val bookNumber = bookDetails.bookIndex + 1
+        val chapterNumber = chapter
+
+        // in a correctly formatted xml file inVerse is not necessary as text is always within verse tags
+        // but this check is done anyway in case there is text next to a non verse tag
+        var inVerse = false
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                val tagname = parser.name.lowercase()
+                if (tagname == "book") {
+
+                } else if (tagname == "chapter") {
+
+                } else if (tagname == "verse") {
+                    inVerse = true
+                }
+                // for cases including tagname testament do nothing
+
+            }
+            else if (eventType == XmlPullParser.TEXT && inVerse) {
+                TODO("add the text to the list of verses")
+            }
+            else if (eventType == XmlPullParser.END_TAG) {
+                inVerse = false
+            }
+        }
         TODO("Not yet implemented")
     }
 
     override fun getLanguage(): String {
-        TODO("Not yet implemented")
+        return language
     }
     init {
         val _translation = translation.lowercase()
