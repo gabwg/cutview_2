@@ -11,6 +11,8 @@ class ReadBibleDataFactory(val context: Context) {
     fun get(translation: String) : ReadBibleData {
         return when (translation) {
             "CUV" -> ReadCUTViewData(context)
+            "NIV" -> ReadBebliaData(context, translation)
+
             else -> throw Exception("Translation not found")
         }
     }

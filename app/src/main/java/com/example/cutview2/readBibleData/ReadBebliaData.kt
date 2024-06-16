@@ -19,7 +19,7 @@ val translationIds = mapOf(
 class ReadBebliaData(context: Context, translation: String) : ReadBibleData {
     val resources = context.resources
 
-    var language = ""
+    private var language = ""
     var xmlId = 0
     override fun getBooknamesList(): List<String> {
         return resources.getStringArray(R.array.booknames_en).toList()

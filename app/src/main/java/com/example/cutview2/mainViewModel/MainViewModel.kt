@@ -41,6 +41,9 @@ class MainViewModel(readData: ReadBibleData, val dataStore: DataStore<Preference
         return readData.getBooknamesList()
     }
     fun getBookname(bookIndex: Int) : String {
+        if (bookIndex < 0 || bookIndex > readData.getBooknamesList().size) {
+            return readData.getBooknamesList()[0]
+        }
         return readData.getBooknamesList()[bookIndex]
     }
     fun getLanguage() : String {
