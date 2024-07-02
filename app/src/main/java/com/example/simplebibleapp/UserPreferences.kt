@@ -1,4 +1,4 @@
-package com.example.cutview2
+package com.example.simplebibleapp
 
 data class UserPreferences(
     val bookname: String,

@@ -1,6 +1,6 @@
-package com.example.cutview2.mainViewModel
+package com.example.simplebibleapp.mainViewModel
 
-import com.example.cutview2.readBibleData.ReadBibleData
+import com.example.simplebibleapp.readBibleData.ReadBibleData
 
 data class MainUiState(
     var book_index : Int = 0,

@@ -1,4 +1,4 @@
-package com.example.cutview2.dataClasses
+package com.example.simplebibleapp.dataClasses
 
 class BookDetails(
     val bookName: String,

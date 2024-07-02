@@ -1,4 +1,4 @@
-package com.example.cutview2
+package com.example.simplebibleapp
 
 import android.content.Context
 import android.os.Bundle
@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,15 +28,15 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModelProvider
-import com.example.cutview2.dataClasses.BookDetails
-import com.example.cutview2.dataClasses.LocalisedPromptIds
-import com.example.cutview2.helpers.HelperFunctions
-import com.example.cutview2.mainAppComponents.Selector
-import com.example.cutview2.mainAppComponents.TextBody
-import com.example.cutview2.mainViewModel.MainViewModel
-import com.example.cutview2.mainViewModel.MainViewModelFactory
-import com.example.cutview2.readBibleData.ReadBibleDataFactory
-import com.example.cutview2.ui.theme.CUTView2Theme
+import com.example.simplebibleapp.dataClasses.BookDetails
+import com.example.simplebibleapp.dataClasses.LocalisedPromptIds
+import com.example.simplebibleapp.helpers.HelperFunctions
+import com.example.simplebibleapp.mainAppComponents.Selector
+import com.example.simplebibleapp.mainAppComponents.TextBody
+import com.example.simplebibleapp.mainViewModel.MainViewModel
+import com.example.simplebibleapp.mainViewModel.MainViewModelFactory
+import com.example.simplebibleapp.readBibleData.ReadBibleDataFactory
+import com.example.simplebibleapp.ui.theme.SBATheme
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 // 1x zoom font size
@@ -52,8 +50,8 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            CUTView2Theme {
-                CUTView2App(this)
+            SBATheme {
+                SBAApp(this)
             }
         }
     }
@@ -61,7 +59,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CUTView2App(activity: ComponentActivity) {
+fun SBAApp(activity: ComponentActivity) {
     val context = LocalContext.current
     val dataStore = context.dataStore
 
@@ -92,7 +90,7 @@ fun CUTView2App(activity: ComponentActivity) {
         chapterCount = mainViewModel.getBookChapterCount(),
         language = mainViewModel.getLanguage())
 
-    CUTView2Ui(
+    SBAUi(
         bookDetails = bookDetails,
         chapter = mainUiState.chapter,
         booknameList = { mainViewModel.getBooknamesList() },
@@ -107,15 +105,15 @@ fun CUTView2App(activity: ComponentActivity) {
 }
 
 @Composable
-fun CUTView2Ui(bookDetails : BookDetails,
-               chapter : Int,
-               booknameList: () -> List<String>,
-               setBookIndex: (Int) -> Unit,
-               setChapter: (Int) -> Unit,
-               getChapterFromBook: (BookDetails, Int) -> List<String>,
-               setTranslation: (String) -> Unit = {},
-               onZoom: (Float) -> (Unit) = {},
-               textStyle: TextStyle
+fun SBAUi(bookDetails : BookDetails,
+          chapter : Int,
+          booknameList: () -> List<String>,
+          setBookIndex: (Int) -> Unit,
+          setChapter: (Int) -> Unit,
+          getChapterFromBook: (BookDetails, Int) -> List<String>,
+          setTranslation: (String) -> Unit = {},
+          onZoom: (Float) -> (Unit) = {},
+          textStyle: TextStyle
 ) {
 
     Scaffold(modifier = Modifier.fillMaxSize(),
@@ -133,9 +131,6 @@ fun CUTView2Ui(bookDetails : BookDetails,
                 setChapter = setChapter,
                 textStyle = textStyle
             )
-            Button(onClick = { setTranslation("NIV") }, modifier = Modifier.padding(16.dp)) {
-                Text("ChangeTranslation")
-            }
 
             TextBody(
                 getChapterFromBook(bookDetails, chapter),
@@ -168,6 +163,7 @@ fun BookChapterSelectors(
     ){
 
         BookSelector(bookDetails, bookNameList, setBookIndex, textStyle)
+        TranslationSelector(textStyle = textStyle)
         ChapterSelector(bookDetails, chapter, setChapter, textStyle)
 
     }
@@ -200,12 +196,22 @@ fun BookSelector(bookDetails: BookDetails, bookNameList: () -> List<String>, set
         textStyle = textStyle
     )
 }
-
+@Composable
+fun TranslationSelector(textStyle: TextStyle) {
+    Selector(
+      listItems = listOf("CUV", "NIV", "ESV"), 
+        currentItem = "CUV",
+        buttonLabel = "CUV",
+        dialogTitle = "Translation",
+        updateFunc = {},
+        textStyle = textStyle
+    )
+}
 
 @Preview(showBackground = true)
 @Composable
-fun CUTView2UiPreview() {
-    CUTView2Ui(
+fun SBAUiPreview() {
+    SBAUi(
         bookDetails = BookDetails("bookname 1", 0, 10,"en"),
         chapter = 1,
         booknameList = { listOf("bookname1", "bookname2") },

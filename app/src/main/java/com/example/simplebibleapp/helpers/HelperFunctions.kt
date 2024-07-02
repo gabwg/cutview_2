@@ -1,7 +1,7 @@
-package com.example.cutview2.helpers
+package com.example.simplebibleapp.helpers
 
-import com.example.cutview2.R
-import com.example.cutview2.dataClasses.LocalisedPromptIds
+import com.example.simplebibleapp.R
+import com.example.simplebibleapp.dataClasses.LocalisedPromptIds
 
 class HelperFunctions() {
     // Map<(Language), Map(PromptType>

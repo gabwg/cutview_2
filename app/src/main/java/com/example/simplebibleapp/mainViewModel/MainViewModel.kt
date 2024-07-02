@@ -1,4 +1,4 @@
-package com.example.cutview2.mainViewModel
+package com.example.simplebibleapp.mainViewModel
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -6,8 +6,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.ViewModel
-import com.example.cutview2.dataClasses.BookDetails
-import com.example.cutview2.readBibleData.ReadBibleData
+import com.example.simplebibleapp.dataClasses.BookDetails
+import com.example.simplebibleapp.readBibleData.ReadBibleData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

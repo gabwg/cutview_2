@@ -1,4 +1,4 @@
-package com.example.cutview2.dataClasses
+package com.example.simplebibleapp.dataClasses
 
 class LocalisedPromptIds(
     val bookPrompt: Int,

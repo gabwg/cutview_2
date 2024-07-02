@@ -1,4 +1,4 @@
-package com.example.cutview2.readBibleData
+package com.example.simplebibleapp.readBibleData
 
 import android.content.Context
 

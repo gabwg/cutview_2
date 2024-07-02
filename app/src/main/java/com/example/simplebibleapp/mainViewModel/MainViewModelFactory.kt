@@ -1,10 +1,10 @@
-package com.example.cutview2.mainViewModel
+package com.example.simplebibleapp.mainViewModel
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.cutview2.readBibleData.ReadBibleData
+import com.example.simplebibleapp.readBibleData.ReadBibleData
 
 class MainViewModelFactory(val readdata: ReadBibleData, val dataStore: DataStore<Preferences>) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

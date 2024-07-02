@@ -1,6 +1,6 @@
-package com.example.cutview2.readBibleData
+package com.example.simplebibleapp.readBibleData
 
-import com.example.cutview2.dataClasses.BookDetails
+import com.example.simplebibleapp.dataClasses.BookDetails
 
 interface ReadBibleData {
 

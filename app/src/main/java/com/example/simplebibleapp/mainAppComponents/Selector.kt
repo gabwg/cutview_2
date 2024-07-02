@@ -1,4 +1,4 @@
-package com.example.cutview2.mainAppComponents
+package com.example.simplebibleapp.mainAppComponents
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

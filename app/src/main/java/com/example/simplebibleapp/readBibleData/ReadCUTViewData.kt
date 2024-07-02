@@ -1,8 +1,8 @@
-package com.example.cutview2.readBibleData
+package com.example.simplebibleapp.readBibleData
 
 import android.content.Context
-import com.example.cutview2.R
-import com.example.cutview2.dataClasses.BookDetails
+import com.example.simplebibleapp.R
+import com.example.simplebibleapp.dataClasses.BookDetails
 import org.xmlpull.v1.XmlPullParser
 
 
