@@ -19,9 +19,9 @@ import kotlinx.coroutines.runBlocking
 
 
 class MainViewModel(readData: ReadBibleData, val dataStore: DataStore<Preferences>) : ViewModel() {
-    private val _uiState = MutableStateFlow(MainUiState())
+    private val _uiState = MutableStateFlow(MainUiState(readData = readData))
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
-    var readData = readData;
+    var readData = _uiState.value.readData;
 
     // book is indexed from 0 (Genesis) to 65 (Revelation)
     val BOOK_INDEX_KEY = intPreferencesKey("bookindex")
@@ -29,6 +29,8 @@ class MainViewModel(readData: ReadBibleData, val dataStore: DataStore<Preference
     val ZOOM_KEY = floatPreferencesKey("zoom")
 
     fun setReadBibleData(readBibleData: ReadBibleData) {
+        _uiState.update { currentState -> currentState.copy(readData = readBibleData) }
+        // readData = _uiState.value.readData
         readData = readBibleData
     }
     fun getFirstbook() : String {
@@ -50,7 +52,7 @@ class MainViewModel(readData: ReadBibleData, val dataStore: DataStore<Preference
         return readData.getLanguage()
     }
     fun resetApp() {
-        _uiState.value = MainUiState(book_index = getFirstbook_Index(), chapter = 1, zoom = 1f)
+        _uiState.value = MainUiState(book_index = getFirstbook_Index(), chapter = 1, zoom = 1f, readData)
     }
     fun getBookChapterCount() : Int {
         return readData.getChapterCount(_uiState.value.book_index)

@@ -136,6 +136,7 @@ fun CUTView2Ui(bookDetails : BookDetails,
             Button(onClick = { setTranslation("NIV") }, modifier = Modifier.padding(16.dp)) {
                 Text("ChangeTranslation")
             }
+
             TextBody(
                 getChapterFromBook(bookDetails, chapter),
                 onZoom,

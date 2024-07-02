@@ -200,7 +200,7 @@ fun SelectorPreview() {
 fun SelectorDialogPreviewLotsOfItems() {
     SelectorDialog(
         title = "Title",
-        currentItem = "A",
+        currentItem = 2,
         listItems = (1..100).toList(),
         updateFunc = {},
         onDismissRequest = {},

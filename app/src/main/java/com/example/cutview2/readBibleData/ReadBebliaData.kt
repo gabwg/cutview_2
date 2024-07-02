@@ -51,27 +51,37 @@ class ReadBebliaData(context: Context, translation: String) : ReadBibleData {
         // in a correctly formatted xml file inVerse is not necessary as text is always within verse tags
         // but this check is done anyway in case there is text next to a non verse tag
         var inVerse = false
+        val verseList = mutableListOf<String>()
+        var currBookNumber = bookNumber
+        var currChapterNumber = chapterNumber
+
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG) {
                 val tagname = parser.name.lowercase()
                 if (tagname == "book") {
-
+                    currBookNumber = parser.getAttributeValue(null, "number").toInt()
                 } else if (tagname == "chapter") {
-
+                    currChapterNumber = parser.getAttributeValue(null, "number").toInt()
                 } else if (tagname == "verse") {
                     inVerse = true
                 }
                 // for cases including tagname testament do nothing
 
             }
-            else if (eventType == XmlPullParser.TEXT && inVerse) {
-                TODO("add the text to the list of verses")
+            else if (eventType == XmlPullParser.TEXT
+                && bookNumber == currBookNumber
+                && chapterNumber == currChapterNumber
+                && inVerse) {
+                // add the text to the list of verses
+                verseList.add(parser.text)
             }
             else if (eventType == XmlPullParser.END_TAG) {
                 inVerse = false
             }
+            eventType = parser.next()
         }
-        TODO("Not yet implemented")
+
+        return verseList
     }
 
     override fun getLanguage(): String {
