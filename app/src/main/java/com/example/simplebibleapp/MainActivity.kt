@@ -65,7 +65,7 @@ fun SBAApp(activity: ComponentActivity) {
 
     val readBibleDataFactory = ReadBibleDataFactory(context)
 
-    val factory = MainViewModelFactory(readBibleDataFactory.get("CUV"), dataStore)
+    val factory = MainViewModelFactory(readBibleDataFactory, dataStore)
     val mainViewModel = ViewModelProvider(activity, factory)[MainViewModel::class.java]
     val mainUiState by mainViewModel.uiState.collectAsState()
 
@@ -97,7 +97,9 @@ fun SBAApp(activity: ComponentActivity) {
         setBookIndex = { b -> mainViewModel.setBookIndex(b) },
         setChapter = { c -> mainViewModel.setChapter(c) },
         getChapterFromBook = { b, c -> mainViewModel.getChapterFromBook(b, c) },
-        setTranslation = { t -> mainViewModel.setReadBibleData(readBibleDataFactory.get(t)) },
+        setTranslation = { t -> mainViewModel.setReadBibleData(t) },
+        translations = mainViewModel.getTranslations(),
+        currentTranslation = mainViewModel.getCurrentTranslation(),
         onZoom = { f -> onZoom(f) },
         textStyle = textStyle
     )
@@ -111,9 +113,12 @@ fun SBAUi(bookDetails : BookDetails,
           setBookIndex: (Int) -> Unit,
           setChapter: (Int) -> Unit,
           getChapterFromBook: (BookDetails, Int) -> List<String>,
+          translations: List<String>,
+          currentTranslation: String,
           setTranslation: (String) -> Unit = {},
           onZoom: (Float) -> (Unit) = {},
-          textStyle: TextStyle
+          textStyle: TextStyle,
+          selectorTextStyle: TextStyle = TextStyle(fontSize = 16.sp)
 ) {
 
     Scaffold(modifier = Modifier.fillMaxSize(),
@@ -123,13 +128,16 @@ fun SBAUi(bookDetails : BookDetails,
             modifier = Modifier
                 .padding(innerPadding)
         ) {
-            BookChapterSelectors(
+            SBASelectors(
                 bookDetails = bookDetails,
                 chapter = chapter,
                 bookNameList = booknameList,
                 setBookIndex = setBookIndex,
                 setChapter = setChapter,
-                textStyle = textStyle
+                translations = translations,
+                currentTranslation = currentTranslation,
+                setTranslation = setTranslation,
+                textStyle = selectorTextStyle
             )
 
             TextBody(
@@ -145,11 +153,14 @@ fun SBAUi(bookDetails : BookDetails,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookChapterSelectors(
+fun SBASelectors(
     bookDetails: BookDetails, chapter: Int,
     bookNameList: () -> List<String>,
     setBookIndex: (Int) -> Unit,
     setChapter: (Int) -> Unit,
+    translations: List<String>,
+    currentTranslation: String,
+    setTranslation: (String) -> Unit,
     textStyle: TextStyle,
     modifier: Modifier = Modifier) {
 
@@ -163,7 +174,7 @@ fun BookChapterSelectors(
     ){
 
         BookSelector(bookDetails, bookNameList, setBookIndex, textStyle)
-        TranslationSelector(textStyle = textStyle)
+        TranslationSelector(translations, currentTranslation, setTranslation, textStyle)
         ChapterSelector(bookDetails, chapter, setChapter, textStyle)
 
     }
@@ -197,13 +208,13 @@ fun BookSelector(bookDetails: BookDetails, bookNameList: () -> List<String>, set
     )
 }
 @Composable
-fun TranslationSelector(textStyle: TextStyle) {
+fun TranslationSelector(translations: List<String>, currentTranslation: String, setTranslation: (String) -> Unit, textStyle: TextStyle) {
     Selector(
-      listItems = listOf("CUV", "NIV", "ESV"), 
-        currentItem = "CUV",
-        buttonLabel = "CUV",
+      listItems = translations,
+        currentItem = currentTranslation,
+        buttonLabel = currentTranslation,
         dialogTitle = "Translation",
-        updateFunc = {},
+        updateFunc = {b -> setTranslation(b)},
         textStyle = textStyle
     )
 }
@@ -219,6 +230,9 @@ fun SBAUiPreview() {
         setChapter = { },
         getChapterFromBook = { b, c -> listOf("verse1", "verse2", "verse3") },
         onZoom = {},
+        translations = listOf("translation1", "translation2"),
+        currentTranslation = "translation1",
+        setTranslation = {},
         textStyle = TextStyle(fontSize = 16.sp)
     )
 }
@@ -242,13 +256,16 @@ fun TextBodyBigSizePreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun BookChapterSelectorsPreview() {
-    BookChapterSelectors(
+fun SBASelectorsPreview() {
+    SBASelectors(
         bookDetails = BookDetails("bookname 1", 0, 10,"en"),
         chapter = 1,
         bookNameList = { listOf("bookname1", "bookname2") },
         setBookIndex = {},
         setChapter = {},
+        translations = listOf("translation1", "translation2"),
+        currentTranslation = "translation1",
+        setTranslation = {},
         textStyle = TextStyle(fontSize = 16.sp)
     )
 }

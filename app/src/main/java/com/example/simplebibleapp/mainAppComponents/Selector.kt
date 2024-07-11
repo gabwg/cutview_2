@@ -14,12 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -163,10 +160,13 @@ fun <T> Selector(
                 horizontalArrangement = Arrangement.End,
             ){
                 Text(buttonLabel, style = textStyle)
+                /*
                 Icon(
                     imageVector = Icons.Filled.ArrowDropDown,
                     contentDescription = "$buttonLabel Dropdown icon",
                 )
+                */
+
             }
         }
         // Dialog launch here

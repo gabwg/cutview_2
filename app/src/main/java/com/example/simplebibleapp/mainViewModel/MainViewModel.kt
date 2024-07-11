@@ -5,9 +5,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import com.example.simplebibleapp.dataClasses.BookDetails
 import com.example.simplebibleapp.readBibleData.ReadBibleData
+import com.example.simplebibleapp.readBibleData.ReadBibleDataFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,20 +20,27 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
-class MainViewModel(readData: ReadBibleData, val dataStore: DataStore<Preferences>) : ViewModel() {
-    private val _uiState = MutableStateFlow(MainUiState(readData = readData))
-    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
-    var readData = _uiState.value.readData;
+class MainViewModel(val readBibleDataFactory: ReadBibleDataFactory, val dataStore: DataStore<Preferences>) : ViewModel() {
+    lateinit var uiState: StateFlow<MainUiState>;
+
+    lateinit var readData : ReadBibleData;
+    // translation is used for 'display' purposes
+    private lateinit var _uiState : MutableStateFlow<MainUiState>;
 
     // book is indexed from 0 (Genesis) to 65 (Revelation)
     val BOOK_INDEX_KEY = intPreferencesKey("bookindex")
     val CHAPTER_KEY = intPreferencesKey("chapter")
     val ZOOM_KEY = floatPreferencesKey("zoom")
+    val TRANSLATION_KEY = stringPreferencesKey("translation")
 
-    fun setReadBibleData(readBibleData: ReadBibleData) {
-        _uiState.update { currentState -> currentState.copy(readData = readBibleData) }
-        // readData = _uiState.value.readData
-        readData = readBibleData
+    fun setReadBibleData(translationName: String) {
+        readData = readBibleDataFactory.get(translationName)
+        _uiState.update { currentState -> currentState.copy(readData = readData) }
+        runBlocking {
+            launch {
+                saveTranslationToDataStore(translationName)
+            }
+        }
     }
     fun getFirstbook() : String {
         return readData.getBooknamesList()[0]
@@ -50,6 +59,12 @@ class MainViewModel(readData: ReadBibleData, val dataStore: DataStore<Preference
     }
     fun getLanguage() : String {
         return readData.getLanguage()
+    }
+    fun getTranslations(): List<String> {
+        return readBibleDataFactory.translations
+    }
+    fun getCurrentTranslation(): String {
+        return readData.getTranslationName()
     }
     fun resetApp() {
         _uiState.value = MainUiState(book_index = getFirstbook_Index(), chapter = 1, zoom = 1f, readData)
@@ -96,6 +111,11 @@ class MainViewModel(readData: ReadBibleData, val dataStore: DataStore<Preference
             preferences[CHAPTER_KEY] = chapter
         }
     }
+    suspend fun saveTranslationToDataStore(translation: String) {
+        dataStore.edit { preferences ->
+            preferences[TRANSLATION_KEY] = translation
+        }
+    }
     suspend fun getBookIndexFromDataStore(): Int {
         return dataStore.data.map { preferences ->
             preferences[BOOK_INDEX_KEY] ?: getFirstbook_Index()
@@ -104,6 +124,11 @@ class MainViewModel(readData: ReadBibleData, val dataStore: DataStore<Preference
     suspend fun getChapterFromDataStore(): Int {
         return dataStore.data.map { preferences ->
             preferences[CHAPTER_KEY] ?: 1
+        }.first()
+    }
+    suspend fun getTranslationFromDataStore(): String {
+        return dataStore.data.map { preferences ->
+            preferences[TRANSLATION_KEY] ?: readBibleDataFactory.defaultTranslation
         }.first()
     }
 
@@ -131,9 +156,14 @@ class MainViewModel(readData: ReadBibleData, val dataStore: DataStore<Preference
     }
 
     init {
-        resetApp()
         runBlocking {
             launch {
+                // must initialise _uiState first
+                readData = readBibleDataFactory.get(getTranslationFromDataStore())
+                _uiState = MutableStateFlow(MainUiState(readData = readData))
+                uiState = _uiState.asStateFlow()
+
+                resetApp()
                 _setBookIndex(getBookIndexFromDataStore())
                 _setChapter(getChapterFromDataStore())
                 _setZoom(getZoomFromDataStore())
