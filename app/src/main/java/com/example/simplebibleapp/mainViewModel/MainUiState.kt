@@ -7,4 +7,5 @@ data class MainUiState(
     var chapter : Int = 0,
     var zoom : Float = 1f,
     var readData: ReadBibleData
+
 )

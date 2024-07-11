@@ -134,6 +134,10 @@ class ReadCUTViewData (private var context: Context) : ReadBibleData {
         templist = templist.map { regex.replace(it, "") }
         return templist
     }
+
+    override fun getTranslationName(): String {
+        return "CUV"
+    }
 }
 // original list copied from cutview app:
 // R.xml.genesis, R.xml.exodus, R.xml.leviticus, R.xml.numbers, R.xml.deuteronomy, R.xml.joshua, R.xml.judges, R.xml.ruth, R.xml.samuel1, R.xml.samuel2, R.xml.kings1, R.xml.kings2, R.xml.chronicles1, R.xml.chronicles2, R.xml.ezra, R.xml.nehemiah, R.xml.esther, R.xml.job, R.xml.psalms, R.xml.proverbs, R.xml.ecclesiastes, R.xml.songofsolomon, R.xml.isaiah, R.xml.jeremiah, R.xml.lamentations, R.xml.ezekiel, R.xml.daniel, R.xml.hosea, R.xml.joel, R.xml.amos, R.xml.obadiah, R.xml.jonah, R.xml.micah, R.xml.nahum, R.xml.habakkuk, R.xml.zephaniah, R.xml.haggai, R.xml.zechariah, R.xml.malachi, R.xml.matthew, R.xml.mark, R.xml.luke, R.xml.john, R.xml.acts, R.xml.romans, R.xml.corinthians1, R.xml.corinthians2, R.xml.galatians, R.xml.ephesians, R.xml.philippians, R.xml.colossians, R.xml.thessalonians1, R.xml.thessalonians2, R.xml.timothy1, R.xml.timothy2, R.xml.titus, R.xml.philemon, R.xml.hebrews, R.xml.james, R.xml.peter1, R.xml.peter2, R.xml.john1, R.xml.john2, R.xml.john3, R.xml.jude, R.xml.revelation

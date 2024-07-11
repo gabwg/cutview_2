@@ -12,4 +12,6 @@ interface ReadBibleData {
     // get chapter. list of strings, each string is a verse, if chapter is greater than book chapter count then reset back to first chapter
     fun getChapterFromBook(bookDetails : BookDetails, chapter: Int) : List<String>
     fun getLanguage(): String
+    // gets the name of the translation
+    fun getTranslationName(): String
 }

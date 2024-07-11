@@ -6,17 +6,17 @@ import com.example.simplebibleapp.dataClasses.BookDetails
 import org.xmlpull.v1.XmlPullParser
 
 
-val en_translations = arrayOf("esv", "kj", "niv")
+val en_translations = arrayOf("esv", "kjv", "niv")
 val translationIds = mapOf(
     "esv" to R.xml.beblia_englishesvbible,
     "niv" to R.xml.beblia_englishnivbible,
-    "kj" to R.xml.beblia_englishkjbible)
+    "kjv" to R.xml.beblia_englishkjbible)
 
 /*
 * Returns a ReadBibleData that uses a xml file sourced from https://github.com/Beblia/Holy-Bible-XML-Format
 * supports esv, kj and niv
 * */
-class ReadBebliaData(context: Context, translation: String) : ReadBibleData {
+class ReadBebliaData(context: Context, val translation: String) : ReadBibleData {
     val resources = context.resources
 
     private var language = ""
@@ -87,6 +87,11 @@ class ReadBebliaData(context: Context, translation: String) : ReadBibleData {
     override fun getLanguage(): String {
         return language
     }
+
+    override fun getTranslationName(): String {
+        return translation
+    }
+
     init {
         val _translation = translation.lowercase()
         if (_translation in en_translations) {
