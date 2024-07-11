@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.cutview2"
+    namespace = "com.example.simplebibleapp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.cutview2"
+        applicationId = "com.example.simplebibleapp"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
