@@ -2,7 +2,7 @@ package com.example.simplebibleapp.readBibleData
 
 import android.content.Context
 import com.example.simplebibleapp.R
-import com.example.simplebibleapp.dataClasses.BookDetails
+import com.example.simplebibleapp.dataClasses.Selection
 import org.xmlpull.v1.XmlPullParser
 
 
@@ -97,13 +97,14 @@ class ReadCUTViewData (private var context: Context) : ReadBibleData {
         return "tcn"
     }
 
-    override fun getChapterFromBook(bookDetails: BookDetails, chapter: Int) : List<String> {
-        val index = bookDetails.bookIndex
+    override fun getChapterFromBook(selection: Selection) : List<String> {
+        val index = selection.bookIndex
+        val chapter = selection.chapter
         if (index == -1) {
             return emptyList()
         }
         if (chapter > getChapterCount(index)) {
-            return listOf("ERROR: Chapter $chapter is out of range", bookDetails.bookName, bookDetails.bookIndex.toString(), bookDetails.chapterCount.toString())
+            return listOf("ERROR: Chapter $chapter is out of range")
         }
         var text = ""
         // parse xml
@@ -126,8 +127,6 @@ class ReadCUTViewData (private var context: Context) : ReadBibleData {
             }
             eventType = parser.next()
         }
-
-
 
         var templist = text.replace("\\10", "\n").split("\n")
         val regex = "^\\d+\\s".toRegex()

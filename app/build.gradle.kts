@@ -59,6 +59,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
     //implementation(libs.compose.preview.renderer)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -71,7 +73,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
     // Preferences DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-
+    implementation("androidx.compose.material:material-icons-core")
+    implementation(libs.androidx.material.icons.extended) // For extended icons
 
 
     // Proto DataStore

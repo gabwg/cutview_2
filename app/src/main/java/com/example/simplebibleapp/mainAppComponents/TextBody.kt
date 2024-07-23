@@ -11,8 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.simplebibleapp.R
 
 @Composable
 fun TextBody(listVerses : List<String>, onZoom: (Float) -> (Unit), textStyle: TextStyle, modifier: Modifier = Modifier) {
@@ -47,4 +51,21 @@ fun TextBody(listVerses : List<String>, onZoom: (Float) -> (Unit), textStyle: Te
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TextBodyDefaultSizePreview() {
+    TextBody(
+        listVerses = listOf("verse1", "verse2", stringResource(R.string.book_prompt_tcn)),
+        onZoom = {},
+        textStyle = TextStyle(fontSize = 16.sp))
+}
+@Preview(showBackground = true)
+@Composable
+fun TextBodyBigSizePreview() {
+    TextBody(
+        listVerses = listOf("verse1", "verse2", stringResource(R.string.book_prompt_tcn)),
+        onZoom = {},
+        textStyle = TextStyle(fontSize = 48.sp))
 }

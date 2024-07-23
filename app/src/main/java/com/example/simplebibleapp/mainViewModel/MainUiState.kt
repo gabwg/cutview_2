@@ -1,11 +1,9 @@
 package com.example.simplebibleapp.mainViewModel
 
-import com.example.simplebibleapp.readBibleData.ReadBibleData
+import com.example.simplebibleapp.dataClasses.DisplayConfig
+import com.example.simplebibleapp.dataClasses.Selection
 
 data class MainUiState(
-    var book_index : Int = 0,
-    var chapter : Int = 0,
-    var zoom : Float = 1f,
-    var readData: ReadBibleData
-
+    val displayConfig: DisplayConfig,
+    val selection: Selection,
 )

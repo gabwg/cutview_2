@@ -1,172 +1,129 @@
 package com.example.simplebibleapp.mainViewModel
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.floatPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
-import com.example.simplebibleapp.dataClasses.BookDetails
-import com.example.simplebibleapp.readBibleData.ReadBibleData
-import com.example.simplebibleapp.readBibleData.ReadBibleDataFactory
+import com.example.simplebibleapp.DEFAULT_FONT_SIZE
+import com.example.simplebibleapp.dataClasses.DisplayConfig
+import com.example.simplebibleapp.dataClasses.LOWERLIMIT
+import com.example.simplebibleapp.dataClasses.Selection
+import com.example.simplebibleapp.dataClasses.UPPERLIMIT
+import com.example.simplebibleapp.dataClasses.sChangeBookIndex
+import com.example.simplebibleapp.dataClasses.sChangeChapter
+import com.example.simplebibleapp.dataClasses.sChangeTranslation
+import com.example.simplebibleapp.readBibleData.DEFAULT_TRANSLATION
+import com.example.simplebibleapp.repositories.DataStoreRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
-class MainViewModel(val readBibleDataFactory: ReadBibleDataFactory, val dataStore: DataStore<Preferences>) : ViewModel() {
+class MainViewModel(dataStoreRepository: DataStoreRepository) : ViewModel() {
     lateinit var uiState: StateFlow<MainUiState>;
-
-    lateinit var readData : ReadBibleData;
-    // translation is used for 'display' purposes
     private lateinit var _uiState : MutableStateFlow<MainUiState>;
 
-    // book is indexed from 0 (Genesis) to 65 (Revelation)
-    val BOOK_INDEX_KEY = intPreferencesKey("bookindex")
-    val CHAPTER_KEY = intPreferencesKey("chapter")
-    val ZOOM_KEY = floatPreferencesKey("zoom")
-    val TRANSLATION_KEY = stringPreferencesKey("translation")
+    /*
+    ChapterSelection functions
+     */
 
-    fun setReadBibleData(translationName: String) {
-        readData = readBibleDataFactory.get(translationName)
-        _uiState.update { currentState -> currentState.copy(readData = readData) }
+    fun setTranslation(translationName: String, dataStoreRepository: DataStoreRepository) {
+        setTranslation(translationName)
         runBlocking {
             launch {
-                saveTranslationToDataStore(translationName)
+                dataStoreRepository.saveTranslationToDataStore(translationName)
             }
         }
     }
-    fun getFirstbook() : String {
-        return readData.getBooknamesList()[0]
-    }
-    fun getFirstbook_Index() : Int {
-        return 0
-    }
-    fun getBooknamesList() : List<String> {
-        return readData.getBooknamesList()
-    }
-    fun getBookname(bookIndex: Int) : String {
-        if (bookIndex < 0 || bookIndex > readData.getBooknamesList().size) {
-            return readData.getBooknamesList()[0]
+    private fun setTranslation(translationName: String) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                selection = sChangeTranslation(currentState.selection, translationName)
+            )
         }
-        return readData.getBooknamesList()[bookIndex]
     }
-    fun getLanguage() : String {
-        return readData.getLanguage()
+
+    fun setBookIndex(bookIndex: Int, dataStoreRepository: DataStoreRepository) {
+        setBookIndex(bookIndex)
+        setChapter(1) // because all books have at least chapter 1
+        runBlocking {
+            launch {
+                dataStoreRepository.saveBookIndexToDataStore(bookIndex)
+            }
+        }
     }
-    fun getTranslations(): List<String> {
-        return readBibleDataFactory.translations
+    private fun setBookIndex(bookIndex: Int) {
+        _uiState.update { currentState -> currentState.copy(
+            selection = sChangeBookIndex(currentState.selection, bookIndex)
+        )}
     }
-    fun getCurrentTranslation(): String {
-        return readData.getTranslationName()
+
+    fun setChapter(chapter: Int, dataStoreRepository: DataStoreRepository) {
+        setChapter(chapter)
+        runBlocking {
+            launch {
+                dataStoreRepository.saveChapterToDataStore(chapter)
+            }
+        }
     }
+    private fun setChapter(chapter: Int) {
+        _uiState.update { currentState -> currentState.copy(
+            selection = sChangeChapter(currentState.selection, chapter)
+        )}
+    }
+
+    /*
+      Zoom functions
+     */
+    fun onZoom(gestureZoom: Float, dataStoreRepository: DataStoreRepository) {
+        val newScale = _uiState.value.displayConfig.zoom * gestureZoom
+        // clamp zoom
+        if (newScale > LOWERLIMIT && newScale < UPPERLIMIT) {
+            setZoom(newScale, dataStoreRepository)
+        }
+    }
+
+    private fun setZoom(zoom: Float, dataStoreRepository: DataStoreRepository) {
+        setZoom(zoom)
+        runBlocking {
+            launch {
+                dataStoreRepository.saveZoomToDataStore(zoom)
+            }
+        }
+    }
+
+    private fun setZoom(zoom: Float) {
+        _uiState.update { currentState -> currentState.copy(
+            displayConfig = DisplayConfig(DEFAULT_FONT_SIZE.value, zoom)
+        )}
+    }
+
+    /*
+    ViewModel functions
+     */
     fun resetApp() {
-        _uiState.value = MainUiState(book_index = getFirstbook_Index(), chapter = 1, zoom = 1f, readData)
-    }
-    fun getBookChapterCount() : Int {
-        return readData.getChapterCount(_uiState.value.book_index)
-    }
-    fun setBookIndex(bookIndex: Int) {
-        _setBookIndex(bookIndex)
-        _setChapter(1) // because all books have at least chapter 1
-        runBlocking {
-            launch {
-                saveBookIndexToDataStore(bookIndex)
-            }
-        }
-    }
-    fun setChapter(chapter: Int) {
-        _setChapter(chapter)
-        runBlocking {
-            launch {
-                saveChapterToDataStore(chapter)
-            }
-        }
-
-    }
-    // non public facing versions, which do not save to datastore
-    private fun _setBookIndex(book_index: Int) {
-        _uiState.update { currentState -> currentState.copy(book_index = book_index)}
-    }
-    private fun _setChapter(chapter: Int) {
-        _uiState.update { currentState -> currentState.copy(chapter = chapter)}
-    }
-    fun getChapterFromBook(bookDetails: BookDetails, chapter: Int) : List<String> {
-        return readData.getChapterFromBook(bookDetails, chapter)
+        _uiState.value = newMainUiState()
     }
 
-    suspend fun saveBookIndexToDataStore(bookindex: Int) {
-        dataStore.edit { preferences ->
-            preferences[BOOK_INDEX_KEY] = bookindex
-        }
+    fun newMainUiState() : MainUiState {
+        return MainUiState(
+            selection = Selection(chapter = 1, bookIndex = 0, translation = DEFAULT_TRANSLATION),
+            displayConfig = DisplayConfig(DEFAULT_FONT_SIZE.value, 1f)
+        )
     }
-    suspend fun saveChapterToDataStore(chapter: Int) {
-        dataStore.edit { preferences ->
-            preferences[CHAPTER_KEY] = chapter
-        }
-    }
-    suspend fun saveTranslationToDataStore(translation: String) {
-        dataStore.edit { preferences ->
-            preferences[TRANSLATION_KEY] = translation
-        }
-    }
-    suspend fun getBookIndexFromDataStore(): Int {
-        return dataStore.data.map { preferences ->
-            preferences[BOOK_INDEX_KEY] ?: getFirstbook_Index()
-        }.first()
-    }
-    suspend fun getChapterFromDataStore(): Int {
-        return dataStore.data.map { preferences ->
-            preferences[CHAPTER_KEY] ?: 1
-        }.first()
-    }
-    suspend fun getTranslationFromDataStore(): String {
-        return dataStore.data.map { preferences ->
-            preferences[TRANSLATION_KEY] ?: readBibleDataFactory.defaultTranslation
-        }.first()
-    }
-
-    fun setZoom(zoom: Float) {
-        _setZoom(zoom)
-        runBlocking {
-            launch {
-                saveZoomToDataStore(zoom)
-            }
-        }
-    }
-
-    private suspend fun saveZoomToDataStore(zoom: Float) {
-        dataStore.edit { preferences ->
-            preferences[ZOOM_KEY] = zoom
-        }
-    }
-    suspend fun getZoomFromDataStore(): Float {
-        return dataStore.data.map { preferences ->
-            preferences[ZOOM_KEY] ?: 1f
-        }.first()
-    }
-    private fun _setZoom(zoom: Float) {
-        _uiState.update { currentState -> currentState.copy(zoom = zoom)}
-    }
-
     init {
         runBlocking {
             launch {
                 // must initialise _uiState first
-                readData = readBibleDataFactory.get(getTranslationFromDataStore())
-                _uiState = MutableStateFlow(MainUiState(readData = readData))
+                _uiState = MutableStateFlow(newMainUiState())
                 uiState = _uiState.asStateFlow()
 
                 resetApp()
-                _setBookIndex(getBookIndexFromDataStore())
-                _setChapter(getChapterFromDataStore())
-                _setZoom(getZoomFromDataStore())
+
+                val dsr = dataStoreRepository
+                setBookIndex(dsr.getBookIndexFromDataStore())
+                setChapter(dsr.getChapterFromDataStore())
+                setZoom(dsr.getZoomFromDataStore())
             }
         }
     }

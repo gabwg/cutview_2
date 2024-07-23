@@ -2,7 +2,7 @@ package com.example.simplebibleapp.readBibleData
 
 import android.content.Context
 import com.example.simplebibleapp.R
-import com.example.simplebibleapp.dataClasses.BookDetails
+import com.example.simplebibleapp.dataClasses.Selection
 import org.xmlpull.v1.XmlPullParser
 
 
@@ -34,7 +34,7 @@ class ReadBebliaData(context: Context, val translation: String) : ReadBibleData 
         return resources.getIntArray(R.array.chapternumbers)[bookIndex]
     }
 
-    override fun getChapterFromBook(bookDetails: BookDetails, chapter: Int): List<String> {
+    override fun getChapterFromBook(selection: Selection): List<String> {
         /* use xml pull parser on the xml specified.
         start/end tags:
         - "testament" tag - effectively ignored as we are going by book, as testaments and book index in xml file are independent
@@ -45,8 +45,8 @@ class ReadBebliaData(context: Context, val translation: String) : ReadBibleData 
         var parser : XmlPullParser = resources.getXml(xmlId)
         var eventType = parser.eventType
 
-        val bookNumber = bookDetails.bookIndex + 1
-        val chapterNumber = chapter
+        val bookNumber = selection.bookIndex + 1
+        val chapterNumber = selection.chapter
 
         // in a correctly formatted xml file inVerse is not necessary as text is always within verse tags
         // but this check is done anyway in case there is text next to a non verse tag
