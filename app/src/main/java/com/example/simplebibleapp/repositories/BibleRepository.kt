@@ -9,6 +9,8 @@ import com.example.simplebibleapp.readBibleData.TRANSLATIONS
 interface BibleRepository {
     fun getTranslations(): List<String>
     fun getBooknamesList(translation: String): List<String>
+    fun getBookname(translation: String, bookIndex: Int): String
+    fun getBookname(selection: Selection): String
     fun getChapterVerses(selection: Selection): List<String>
     fun getChapterCount(selection: Selection) : Int
     fun getLanguage(translation: String) : String
@@ -21,6 +23,15 @@ class LocalBibleRepository(context: Context) : BibleRepository {
     override fun getBooknamesList(translation: String): List<String> {
         return getReadBibleData(translation).getBooknamesList()
     }
+
+    override fun getBookname(translation: String, bookIndex: Int): String {
+        return getBooknamesList(translation)[bookIndex] ?: "ERR"
+    }
+
+    override fun getBookname(selection: Selection): String {
+        return getBookname(selection.translation, selection.bookIndex)
+    }
+
     override fun getChapterVerses(selection: Selection): List<String> {
         return getReadBibleData(selection.translation)
             .getChapterFromBook(selection)
@@ -47,6 +58,12 @@ class DummyBibleRepository() : BibleRepository {
         return listOf("B1", "B2", "B3")
     }
 
+    override fun getBookname(translation: String, bookIndex: Int): String {
+        return getBooknamesList(translation)[bookIndex]
+    }
+    override fun getBookname(selection: Selection): String {
+        return getBookname(selection.translation, selection.bookIndex)
+    }
     override fun getChapterCount(selection: Selection):Int {
         return 4
     }

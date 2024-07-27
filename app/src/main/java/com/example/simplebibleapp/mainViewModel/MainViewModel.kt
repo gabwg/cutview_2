@@ -11,15 +11,18 @@ import com.example.simplebibleapp.dataClasses.sChangeChapter
 import com.example.simplebibleapp.dataClasses.sChangeTranslation
 import com.example.simplebibleapp.readBibleData.DEFAULT_TRANSLATION
 import com.example.simplebibleapp.repositories.DataStoreRepository
+import com.example.simplebibleapp.repositories.HistoryRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
-class MainViewModel(dataStoreRepository: DataStoreRepository) : ViewModel() {
+class MainViewModel(val dataStoreRepository: DataStoreRepository, val historyRepository: HistoryRepository) : ViewModel() {
     lateinit var uiState: StateFlow<MainUiState>;
     private lateinit var _uiState : MutableStateFlow<MainUiState>;
 
@@ -27,15 +30,15 @@ class MainViewModel(dataStoreRepository: DataStoreRepository) : ViewModel() {
     ChapterSelection functions
      */
 
-    fun setTranslation(translationName: String, dataStoreRepository: DataStoreRepository) {
-        setTranslation(translationName)
+    fun setTranslation(translationName: String) {
+        _setTranslation(translationName)
         runBlocking {
             launch {
                 dataStoreRepository.saveTranslationToDataStore(translationName)
             }
         }
     }
-    private fun setTranslation(translationName: String) {
+    private fun _setTranslation(translationName: String) {
         _uiState.update { currentState ->
             currentState.copy(
                 selection = sChangeTranslation(currentState.selection, translationName)
@@ -43,8 +46,8 @@ class MainViewModel(dataStoreRepository: DataStoreRepository) : ViewModel() {
         }
     }
 
-    fun setBookIndex(bookIndex: Int, dataStoreRepository: DataStoreRepository) {
-        setBookIndex(bookIndex)
+    fun setBookIndex(bookIndex: Int) {
+        _setBookIndex(bookIndex)
         setChapter(1) // because all books have at least chapter 1
         runBlocking {
             launch {
@@ -52,21 +55,21 @@ class MainViewModel(dataStoreRepository: DataStoreRepository) : ViewModel() {
             }
         }
     }
-    private fun setBookIndex(bookIndex: Int) {
+    private fun _setBookIndex(bookIndex: Int) {
         _uiState.update { currentState -> currentState.copy(
             selection = sChangeBookIndex(currentState.selection, bookIndex)
         )}
     }
 
-    fun setChapter(chapter: Int, dataStoreRepository: DataStoreRepository) {
-        setChapter(chapter)
+    fun setChapter(chapter: Int) {
+        _setChapter(chapter)
         runBlocking {
             launch {
                 dataStoreRepository.saveChapterToDataStore(chapter)
             }
         }
     }
-    private fun setChapter(chapter: Int) {
+    private fun _setChapter(chapter: Int) {
         _uiState.update { currentState -> currentState.copy(
             selection = sChangeChapter(currentState.selection, chapter)
         )}
@@ -75,16 +78,16 @@ class MainViewModel(dataStoreRepository: DataStoreRepository) : ViewModel() {
     /*
       Zoom functions
      */
-    fun onZoom(gestureZoom: Float, dataStoreRepository: DataStoreRepository) {
+    fun onZoom(gestureZoom: Float) {
         val newScale = _uiState.value.displayConfig.zoom * gestureZoom
         // clamp zoom
         if (newScale > LOWERLIMIT && newScale < UPPERLIMIT) {
-            setZoom(newScale, dataStoreRepository)
+            setZoom(newScale)
         }
     }
 
-    private fun setZoom(zoom: Float, dataStoreRepository: DataStoreRepository) {
-        setZoom(zoom)
+    private fun setZoom(zoom: Float) {
+        _setZoom(zoom)
         runBlocking {
             launch {
                 dataStoreRepository.saveZoomToDataStore(zoom)
@@ -92,12 +95,25 @@ class MainViewModel(dataStoreRepository: DataStoreRepository) : ViewModel() {
         }
     }
 
-    private fun setZoom(zoom: Float) {
+    private fun _setZoom(zoom: Float) {
         _uiState.update { currentState -> currentState.copy(
             displayConfig = DisplayConfig(DEFAULT_FONT_SIZE.value, zoom)
         )}
     }
 
+    /*
+    History functions
+     */
+    suspend fun insertSelection(selection: Selection) {
+        historyRepository.insert(selection)
+    }
+    fun getAllHistory() : Flow<List<Selection>> {
+        return historyRepository.getAll.map { list ->
+            list.map { historyRecord ->
+                historyRecord.selection
+            }
+        }
+    }
     /*
     ViewModel functions
      */
@@ -121,9 +137,10 @@ class MainViewModel(dataStoreRepository: DataStoreRepository) : ViewModel() {
                 resetApp()
 
                 val dsr = dataStoreRepository
-                setBookIndex(dsr.getBookIndexFromDataStore())
-                setChapter(dsr.getChapterFromDataStore())
-                setZoom(dsr.getZoomFromDataStore())
+                _setBookIndex(dsr.getBookIndexFromDataStore())
+                _setChapter(dsr.getChapterFromDataStore())
+                _setZoom(dsr.getZoomFromDataStore())
+                _setTranslation(dsr.getTranslationFromDataStore())
             }
         }
     }

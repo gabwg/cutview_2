@@ -21,11 +21,12 @@ import com.example.simplebibleapp.dataClasses.DisplayConfig
 import com.example.simplebibleapp.dataClasses.DisplayConfigSetter
 import com.example.simplebibleapp.dataClasses.Selection
 import com.example.simplebibleapp.dataClasses.SelectionSetter
+import com.example.simplebibleapp.logDb.HistoryRoomDatabase
 import com.example.simplebibleapp.mainViewModel.MainViewModel
 import com.example.simplebibleapp.mainViewModel.MainViewModelFactory
-import com.example.simplebibleapp.readBibleData.ReadBibleDataFactory
 import com.example.simplebibleapp.repositories.BibleRepository
 import com.example.simplebibleapp.repositories.DataStoreRepository
+import com.example.simplebibleapp.repositories.HistoryRepository
 import com.example.simplebibleapp.repositories.LocalBibleRepository
 import com.example.simplebibleapp.ui.NavBar
 
@@ -38,21 +39,21 @@ enum class SBAScreens(val label: String, val icon: ImageVector) {
 @Composable
 fun SBAApp(activity: ComponentActivity) {
     val context = LocalContext.current
-    val dataStore = context.dataStore
+    val historyRepository by lazy { HistoryRepository(HistoryRoomDatabase.getDatabase(context).HistoryDao()) }
 
-    val readBibleDataFactory = ReadBibleDataFactory(context)
-
-    val factory = MainViewModelFactory(DataStoreRepository(context))
+    val factory = MainViewModelFactory(DataStoreRepository(context), historyRepository)
     val mainViewModel = ViewModelProvider(activity, factory)[MainViewModel::class.java]
     val mainUiState by mainViewModel.uiState.collectAsState()
+    val history by mainViewModel.getAllHistory().collectAsState(initial = listOf())
+
 
     val displayConfigSetter = DisplayConfigSetter(
-        onZoom = {x -> mainViewModel.onZoom(x, DataStoreRepository(context))}
+        onZoom = {x -> mainViewModel.onZoom(x)}
     )
     val selectionSetter = SelectionSetter(
-        setChapter = {x -> mainViewModel.setChapter(x, DataStoreRepository(context))},
-        setBookIndex = {x -> mainViewModel.setBookIndex(x, DataStoreRepository(context))},
-        setTranslation = {x -> mainViewModel.setTranslation(x, DataStoreRepository(context))}
+        setChapter = {x -> mainViewModel.setChapter(x)},
+        setBookIndex = {x -> mainViewModel.setBookIndex(x)},
+        setTranslation = {x -> mainViewModel.setTranslation(x)}
     )
 
     SBAScreen(
@@ -60,7 +61,10 @@ fun SBAApp(activity: ComponentActivity) {
         displayConfigSetter = displayConfigSetter,
         selection = mainUiState.selection,
         selectionSetter = selectionSetter,
-        bibleRepository = LocalBibleRepository(context)
+        bibleRepository = LocalBibleRepository(context),
+        insert = {x -> historyRepository.insert(x)},
+        history = history,
+        deleteAll = {historyRepository.deleteAll()}
     )
 
 }
@@ -71,7 +75,10 @@ fun SBAScreen(
     displayConfigSetter: DisplayConfigSetter,
     selection: Selection,
     selectionSetter: SelectionSetter,
-    bibleRepository: BibleRepository
+    bibleRepository: BibleRepository,
+    insert: suspend (Selection) -> Unit,
+    history: List<Selection>,
+    deleteAll: suspend () -> Unit
 ) {
     val navController = rememberNavController()
     Scaffold(modifier = Modifier.fillMaxSize(),
@@ -92,7 +99,16 @@ fun SBAScreen(
                 )
             }
             composable(SBAScreens.History.name) {
-                HistoryScreen()
+                HistoryScreen(
+                    selection = selection,
+                    selectionSetter = selectionSetter,
+                    insert = insert,
+                    history = history,
+                    getBookname = { x, y -> bibleRepository.getBookname(x, y) },
+                    deleteAll = deleteAll,
+                    goToBibleReader = { navController.navigate(SBAScreens.BibleReader.name) }
+                )
+
             }
         }
     }

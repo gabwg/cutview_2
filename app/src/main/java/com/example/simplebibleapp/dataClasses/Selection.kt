@@ -1,5 +1,6 @@
 package com.example.simplebibleapp.dataClasses
 
+import androidx.room.TypeConverter
 import com.example.simplebibleapp.readBibleData.DEFAULT_TRANSLATION
 
 data class Selection(
@@ -32,3 +33,16 @@ data class SelectionSetter(
     val setBookIndex: (Int) -> Unit,
     val setTranslation: (String) -> Unit
 )
+
+class SelectionConverters {
+    @TypeConverter
+    fun fromSelection(selection: Selection): String {
+        return "${selection.chapter},${selection.bookIndex},${selection.translation}"
+    }
+    @TypeConverter
+    fun toSelection(value: String): Selection {
+        val parts = value.split(",")
+        return Selection(parts[0].toInt(), parts[1].toInt(), parts[2])
+    }
+
+}
